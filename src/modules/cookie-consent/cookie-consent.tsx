@@ -1,6 +1,6 @@
 import useLocalStorageState from 'use-local-storage-state';
-import { useTranslation, Trans } from 'next-i18next';
 
+import { useTranslation, Trans } from 'next-i18next';
 import { Box } from '@/shared/components/system/box';
 import * as Text from '@/shared/components/system/text';
 import { Button } from '@/shared/components/system/button';
@@ -41,7 +41,7 @@ export const CookieConsent = () => {
             <Trans t={t} i18nKey="cookie_consent.title" components={[<Link target="_blank" href="https://www.cookiesandyou.com" />]} />
           </Text.Paragraph>
 
-          <Button variant="outlined" size="small" onClick={() => setIsAllowed(true)}>{t('cookie_consent.action')}</Button>
+          <Button variant="outlined" onClick={() => setIsAllowed(true)}>{t('cookie_consent.action')}</Button>
         </Box>
       </Box>
     </Portal>
