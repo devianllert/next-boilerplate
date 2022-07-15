@@ -7,9 +7,17 @@
  */
 {
   "presets": [
-    "next/babel"
+    "next/babel",
+    "patronum/babel-preset"
   ],
   "plugins": [
-    "@emotion/babel-plugin"
+    "@emotion/babel-plugin",
+    [
+      "effector/babel-plugin",
+      {
+        "reactSsr": true,
+        "factories": ["src/shared/lib/next-effector/router/createRoute", "@/shared/lib/next-effector/router/createRoute"]
+      }
+    ]
   ]
 }

@@ -6,6 +6,7 @@ import { appWithTranslation, useTranslation } from 'next-i18next';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import { Provider as EffectorProvider } from 'effector-react/scope';
 
 import { configureSentryI18n } from '@/shared/lib/sentry';
 import { isBrowser } from '@/shared/lib/is-browser';
@@ -17,7 +18,6 @@ import { createLogger } from '@/shared/lib/logging/logger';
 import { REACT_QUERY_STATE_PROP_NAME } from '@/shared/types/react-query';
 import { NProgressRoot } from '@/modules/nprogress';
 import { isEmpty } from '@/shared/lib/assertion';
-
 import { getLinksAlternateHref } from '@/shared/lib/meta';
 import { MultiversalAppBootstrapProps } from '../types/multiversal-app-bootstrap-props';
 import BrowserPageBootstrap, { BrowserPageBootstrapProps } from './browser-page-bootstrap';
@@ -25,6 +25,9 @@ import ServerPageBootstrap, { ServerPageBootstrapProps } from './server-page-boo
 import { SSRPageProps } from '@/shared/types/ssr-page-props';
 import { SSGPageProps } from '@/shared/types/ssg-page-props';
 import ErrorPage from '@/pages/_error';
+import { EffectorRouter } from '@/shared/lib/next-effector/router/router';
+import { EFFECTOR_STATE_PROP_NAME } from '@/shared/types/app-props';
+import { useScope } from '@/shared/lib/next-effector/scope';
 
 export type Props = MultiversalAppBootstrapProps<SSGPageProps> | MultiversalAppBootstrapProps<SSRPageProps>;
 
@@ -40,10 +43,15 @@ const logger = createLogger(fileLabel);
  * @param props
  */
 const MultiversalAppBootstrap = (props: Props): JSX.Element => {
-  const { pageProps, router, err } = props;
+  const {
+    pageProps,
+    router,
+    err,
+  } = props;
 
   const [isSSGFallbackInitialBuild] = React.useState<boolean>(isEmpty(pageProps) && router?.isFallback === true);
   const [queryClient] = React.useState(() => new QueryClient());
+  const scope = useScope(pageProps[EFFECTOR_STATE_PROP_NAME]);
   const { i18n } = useTranslation();
 
   Sentry.addBreadcrumb({
@@ -119,24 +127,27 @@ const MultiversalAppBootstrap = (props: Props): JSX.Element => {
         {getLinksAlternateHref(router.asPath, router.locales)}
       </Head>
 
-      <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps[REACT_QUERY_STATE_PROP_NAME]}>
-          <ThemeProvider theme={theme}>
-            <GlobalStyles />
-            <ResetStyles />
+      <EffectorProvider value={scope}>
+        <EffectorRouter />
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps[REACT_QUERY_STATE_PROP_NAME]}>
+            <ThemeProvider theme={theme}>
+              <GlobalStyles />
+              <ResetStyles />
 
-            <NProgressRoot showAfterMs={100} />
+              <NProgressRoot showAfterMs={200} />
 
-            {isBrowser() ? (
-              <BrowserPageBootstrap {...multiversalPageBootstrapProps} />
-            ) : (
-              <ServerPageBootstrap {...multiversalPageBootstrapProps} />
-            )}
-          </ThemeProvider>
-        </Hydrate>
+              {isBrowser() ? (
+                <BrowserPageBootstrap {...multiversalPageBootstrapProps} />
+              ) : (
+                <ServerPageBootstrap {...multiversalPageBootstrapProps} />
+              )}
+            </ThemeProvider>
+          </Hydrate>
 
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </EffectorProvider>
     </>
   );
 };

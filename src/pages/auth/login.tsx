@@ -38,7 +38,7 @@ export const getStaticProps = getTranslationsStaticProps(['auth']);
  *
  * Beware props in OnlyBrowserPageProps are not available on the server
  */
-type Props = (SSRPageProps & SSGPageProps<OnlyBrowserPageProps>);
+type Props = SSRPageProps & SSGPageProps<OnlyBrowserPageProps>;
 
 const LoginPage: EnhancedNextPage<Props> = (): JSX.Element => {
   const { t } = useTranslation('auth');
@@ -47,18 +47,12 @@ const LoginPage: EnhancedNextPage<Props> = (): JSX.Element => {
 
   return (
     <>
-      <PageSEO
-        title={t('seo.login.title')}
-        description={t('seo.login.description')}
-        image={t('seo.image')}
-      />
+      <PageSEO title={t('seo.login.title')} description={t('seo.login.description')} image={t('seo.image')} />
 
-      <Box
-        component="form"
-        maxWidth="440px"
-        width="100%"
-      >
-        <Text.Heading variant="h4" component="h1" sx={{ mb: 4 }}>{t('login')}</Text.Heading>
+      <Box component="form" maxWidth="440px" width="100%">
+        <Text.Heading variant="h4" component="h1" sx={{ mb: 4 }}>
+          {t('login')}
+        </Text.Heading>
 
         <Stack direction="column">
           <Input
@@ -86,13 +80,13 @@ const LoginPage: EnhancedNextPage<Props> = (): JSX.Element => {
             fullWidth
           />
 
-          <Button variant="contained" fullWidth disableElevation>{t('login')}</Button>
+          <Button variant="contained" fullWidth disableElevation>
+            {t('login')}
+          </Button>
         </Stack>
 
         <Text.Paragraph variant="body2">
-          {t('needAccount')}
-          {' '}
-          <Link href="/auth/signup">{t('signup')}</Link>
+          {t('needAccount')} <Link href="/auth/signup" shallow>{t('signup')}</Link>
         </Text.Paragraph>
       </Box>
     </>

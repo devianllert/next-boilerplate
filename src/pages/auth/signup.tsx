@@ -41,7 +41,7 @@ export const getStaticProps = getTranslationsStaticProps(['auth']);
 type Props = (SSRPageProps & SSGPageProps<OnlyBrowserPageProps>);
 
 const SignUpPage: EnhancedNextPage<Props> = (): JSX.Element => {
-  const { t, i18n } = useTranslation('auth');
+  const { t } = useTranslation('auth');
 
   const [show, toggleShow] = useBoolean(false);
 
@@ -110,7 +110,7 @@ const SignUpPage: EnhancedNextPage<Props> = (): JSX.Element => {
         </Stack>
 
         <Text.Paragraph variant="body2">
-          <Link href="/auth/login">{t('haveAccount')}</Link>
+          <Link href="/auth/login" shallow>{t('haveAccount')}</Link>
         </Text.Paragraph>
       </Box>
     </>

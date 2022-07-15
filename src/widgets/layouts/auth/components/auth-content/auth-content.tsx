@@ -24,9 +24,7 @@ const variants = {
 };
 
 export const AuthContent = (props: AuthContentProps): JSX.Element => {
-  const {
-    children,
-  } = props;
+  const { children } = props;
 
   const router = useRouter();
 

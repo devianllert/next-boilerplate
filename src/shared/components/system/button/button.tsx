@@ -122,7 +122,6 @@ export const Button: PolymorphicComponent<ButtonProps, 'button'> = React.forward
     component: Component,
     color = 'primary',
     variant = 'text',
-    type,
     disableElevation,
     disabled,
     startIcon: startIconProp,

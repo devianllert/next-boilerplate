@@ -10,6 +10,9 @@ export const pagesPath = {
       $url: (url?: { hash?: string }) => ({ pathname: '/auth/signup' as const, hash: url?.hash }),
     },
   },
+  todo: {
+    $url: (url?: { hash?: string }) => ({ pathname: '/todo' as const, hash: url?.hash }),
+  },
   weather: {
     _place: (place: string | number) => ({
       $url: (url?: { hash?: string }) => ({ pathname: '/weather/[place]' as const, query: { place }, hash: url?.hash }),

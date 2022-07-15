@@ -1,18 +1,26 @@
 import '@/shared/lib/wdyr/wdyr';
 
 import * as React from 'react';
+import App, { AppContext } from 'next/app';
+import { allSettled, fork, serialize } from 'effector';
 
 import MultiversalAppBootstrap from '@/app/components/multiversal-app-bootstrap';
 import { MultiversalAppBootstrapProps } from '@/app/types/multiversal-app-bootstrap-props';
 import { SSGPageProps } from '@/shared/types/ssg-page-props';
 import { SSRPageProps } from '@/shared/types/ssr-page-props';
 import '@/app/components/multiversal-global-external-styles';
+import { onLocationChange } from '@/shared/lib/next-effector/router/router';
+import { EFFECTOR_STATE_PROP_NAME } from '@/shared/types/app-props';
+import locationFromUrl from '@/shared/lib/next-effector/router/locationFromUrl';
+import { appStarted } from '@/shared/lib/init';
 
 /**
  * "props.pageProps" will depend on whether the page is served by server or client, SSG or SSR
  * (MultiversalAppBootstrapProps<SSGPageProps> | MultiversalAppBootstrapProps<SSRPageProps>) is basically a superset of AppProps (from 'next/app')
  */
-type MultiversalPageEntryPointProps = MultiversalAppBootstrapProps<SSGPageProps> | MultiversalAppBootstrapProps<SSRPageProps>;
+type MultiversalPageEntryPointProps =
+  | MultiversalAppBootstrapProps<SSGPageProps>
+  | MultiversalAppBootstrapProps<SSRPageProps>;
 
 /**
  * This file is the entry point for all pages, it initialize all pages.
@@ -88,5 +96,31 @@ export { reportWebVitals } from '@/shared/lib/web-vitals/report-web-vitals';
  * @see https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering "getServerSideProps" doc
  */
 // MultiversalPageEntryPoint.getInitialProps = async (props: AppInitialProps): Promise<MultiversalAppBootstrapProps> {}
+MultiversalPageEntryPoint.getInitialProps = async (props: AppContext): Promise<any> => {
+  const appProps = await App.getInitialProps(props);
+
+  // const route = getRoute(props.Component);
+
+  const location = locationFromUrl(props.ctx.asPath || props.router.asPath);
+
+  const scope = fork();
+
+  console.log('APP STARTED');
+
+  await allSettled(appStarted, { scope, params: { ...props.ctx, query: location.query } });
+  await allSettled(onLocationChange, { scope, params: location });
+
+  // if (route) {
+  //   await allSettled(routeResolved, { scope, params: { params: props.ctx.query, query: location.query } });
+  // }
+
+  return {
+    ...appProps,
+    pageProps: {
+      ...appProps.pageProps,
+      [EFFECTOR_STATE_PROP_NAME]: serialize(scope),
+    },
+  };
+};
 
 export default MultiversalPageEntryPoint;

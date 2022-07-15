@@ -1,43 +1,33 @@
 import * as React from 'react';
-import { useEvent } from 'effector-react';
+import { useEvent } from 'effector-react/scope';
 import { RiCloseLine } from 'react-icons/ri';
 
 import { Box } from '@/shared/components/system/box';
 import { Checkbox } from '@/shared/components/system/checkbox';
-
-import { Todo } from '../types';
-import { remove, update } from '../model';
 import { IconButton } from '@/shared/components/system/icon-button';
 
+import shape from '@/shared/design/tokens/shape';
+
+import { Todo } from '../types';
+import { todoRemoved, todoUpdated } from '../model';
+
 export interface TodoItemProps {
-  before?: React.ReactNode;
-  after?: React.ReactNode;
   data: Todo;
 }
 
 export const TodoItem = (props: TodoItemProps) => {
-  const {
-    data,
-    before,
-    after,
-  } = props;
+  const { data } = props;
 
-  const onTodoUpdate = useEvent(update);
-  const onTodoDelete = useEvent(remove);
+  const onTodoUpdate = useEvent(todoUpdated);
+  const onTodoDelete = useEvent(todoRemoved);
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-    >
+    <Box display="flex" alignItems="center" py={2} px={2} backgroundColor="background.secondary" borderRadius={shape.round}>
       <Checkbox
+        label={data.title}
         checked={data.completed}
         onChange={(event) => onTodoUpdate({ ...data, completed: event.target.checked })}
       />
-
-      {before}
-      {data.title}
-      {after}
 
       <IconButton
         size="small"

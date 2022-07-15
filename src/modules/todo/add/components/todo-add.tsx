@@ -3,14 +3,14 @@ import { useStore, useEvent } from 'effector-react/scope';
 
 import { Input } from '@/shared/components/system/input';
 import { Box } from '@/shared/components/system/box';
-
-import { model } from '@/entities/todo';
 import { Button } from '@/shared/components/system/button';
 
+import { todoModel } from '@/entities/todo';
+
 export const TodoAdd = () => {
-  const title = useStore(model.$todoTitle);
-  const onTitleChange = useEvent(model.todoTitleChangeEvent);
-  const onTodoAdd = useEvent(model.submit);
+  const title = useStore(todoModel.$todoTitle);
+  const onTitleChange = useEvent(todoModel.titleChanged);
+  const onTodoAdd = useEvent(todoModel.submit);
 
   return (
     <Box
@@ -27,7 +27,7 @@ export const TodoAdd = () => {
         onChange={(event) => onTitleChange(event.target.value)}
       />
 
-      <Button variant="contained" sx={{ ml: 3 }}>Add</Button>
+      <Button type="submit" variant="contained" sx={{ ml: 3, width: 180 }}>Add</Button>
     </Box>
   );
 };
