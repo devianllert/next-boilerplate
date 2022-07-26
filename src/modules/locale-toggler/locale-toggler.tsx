@@ -13,7 +13,10 @@ export const LocaleToggler = (): JSX.Element => {
   const router = useRouter();
 
   const changeLocale = (locale: string) => {
-    router.replace(router.pathname, undefined, { locale }) as unknown as void;
+    const { pathname, asPath, query } = router;
+
+    // change just the locale and maintain all other route information including href's query
+    router.replace({ pathname, query }, asPath, { locale }) as unknown as void;
   };
 
   return (

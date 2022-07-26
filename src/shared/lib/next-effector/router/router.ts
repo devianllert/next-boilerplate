@@ -26,7 +26,7 @@ interface TransitionOptions {
 }
 
 export const onLocationChange = createEvent<LocationState>();
-export const $routerStore = createStore(createInitialRouterState()).on(onLocationChange, (_, payload) => payload);
+export const $routerLocation = createStore(createInitialRouterState()).on(onLocationChange, (_, payload) => payload);
 
 export const routerReady = createEvent<NextRouterType>();
 export const $router = restore(routerReady, NextRouter);
@@ -42,7 +42,7 @@ export const EffectorRouter = (props: EffectorRouterProps) => {
 
   const Router = PropsRouter || NextRouter;
 
-  const routerStore = useStore($routerStore);
+  const routerStore = useStore($routerLocation);
   const onLocationChangedEvent = useEvent(onLocationChange);
   const onRouterReady = useEvent(routerReady);
 
@@ -78,13 +78,12 @@ export const EffectorRouter = (props: EffectorRouterProps) => {
 
   React.useEffect(() => {
     function onRouteChangeFinish(url: string): void {
-      // if (url !== routerStore.href) {
-      onLocationChangedEvent(locationFromUrl(url));
-      // }
+      if (url !== routerStore.href) {
+        onLocationChangedEvent(locationFromUrl(url));
+      }
     }
 
     Router.ready(() => {
-      // eslint-disable-next-line prefer-destructuring
       // Router.ready ensures that Router.router is defined
       const router: NextRouterType = Router.router!;
 

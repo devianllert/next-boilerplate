@@ -6,18 +6,23 @@ import {
   createEvent,
   createStore,
 } from 'effector';
-import { persist as persistLocalStorage } from 'effector-storage/local';
 import * as uuid from 'uuid';
 
-import { loadTodos, saveTodos } from '../api';
+import axios from 'axios';
 import { filters } from '../lib';
-import { Todo, TodoFilters } from '../types';
+import {
+  Todo, UpdateTodoDto, TodoFilters, CreateTodoDto,
+} from '../types';
 import { appStarted } from '@/shared/lib/init';
 
-export const titleChanged = createEvent<string>();
+export const todosLoadFx = createEffect(async () => axios.get<Todo[]>('https://jsonplaceholder.typicode.com/todos'));
+export const todosAddFx = createEffect(async (createTodoDto: CreateTodoDto) => axios.post<Todo>('https://jsonplaceholder.typicode.com/todos', createTodoDto));
+export const todosUpdateFx = createEffect(async (updateTodoDto: UpdateTodoDto) => axios.put<Todo>(`https://jsonplaceholder.typicode.com/todos/${updateTodoDto.id}`, updateTodoDto));
+export const todosRemoveFx = createEffect(async (id: string) => axios.delete<Todo>(`https://jsonplaceholder.typicode.com/todos/${id}`));
 
+export const titleChanged = createEvent<string>();
 export const todoAdded = createEvent<string>();
-export const todoUpdated = createEvent<Todo>();
+export const todoUpdated = createEvent<UpdateTodoDto>();
 export const todoRemoved = createEvent<Todo['id']>();
 
 export const filterChanged = createEvent<TodoFilters>();
@@ -35,6 +40,7 @@ sample({
 });
 
 export const $todos = createStore<Todo[]>([])
+  .on(todosLoadFx.doneData, (_, response) => response.data)
   .on(todoAdded, (todos, title) => {
     const newTodo: Todo = {
       id: uuid.v4(),
@@ -54,7 +60,29 @@ export const $todos = createStore<Todo[]>([])
     return found;
   }));
 
-persistLocalStorage({ store: $todos, key: 'todos' });
+sample({
+  clock: todoAdded,
+  fn: (title) => ({
+    title,
+    completed: false,
+  }),
+  target: todosAddFx,
+});
+
+sample({
+  clock: todoUpdated,
+  target: todosUpdateFx,
+});
+
+sample({
+  clock: todoRemoved,
+  target: todosRemoveFx,
+});
+
+sample({
+  clock: [todosAddFx.done, todosRemoveFx.done, todosUpdateFx.done],
+  target: todosLoadFx,
+});
 
 export const submit = createEvent<React.SyntheticEvent>();
 
@@ -72,13 +100,3 @@ export const $todosFilteredList = combine($todos, $todosFilter, (todoList, filte
 export const $todosCount = $todosFilteredList.map((todos) => todos.length);
 
 export const $isTodoListEmpty = $todosCount.map((count) => count === 0);
-
-export const todosLoadFx = createEffect(() => {
-  const todos = loadTodos();
-
-  return todos;
-});
-
-export const todosSaveFx = createEffect((todos: Todo[]) => {
-  saveTodos(todos);
-});

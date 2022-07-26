@@ -1,21 +1,26 @@
-import { useList } from 'effector-react/scope';
+import { useList, useStore } from 'effector-react/scope';
 
 import { Box } from '@/shared/components/system/box';
-import { DisplayOnBrowserMount } from '@/shared/components/rehydration/display-on-browser-mount';
-
-import { todoModel, TodoItem } from '@/entities/todo';
 import { Stack } from '@/shared/components/system/stack';
 
+import { todoModel, TodoItem } from '@/entities/todo';
+
 export const TodoList = () => {
+  const isTodoListEmpty = useStore(todoModel.$isTodoListEmpty);
+
   return (
-    <DisplayOnBrowserMount>
-      <Box mt={4}>
-        <Stack space={3}>
-          {useList(todoModel.$todosFilteredList, (todo) => (
-            <TodoItem data={todo} />
-          ))}
-        </Stack>
-      </Box>
-    </DisplayOnBrowserMount>
+    <Box mt={4}>
+      {isTodoListEmpty && (
+        <Box>
+          There is no tasks
+        </Box>
+      )}
+
+      <Stack space={3}>
+        {useList(todoModel.$todosFilteredList, (todo) => (
+          <TodoItem data={todo} />
+        ))}
+      </Stack>
+    </Box>
   );
 };

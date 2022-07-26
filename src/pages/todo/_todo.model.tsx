@@ -1,27 +1,23 @@
 import { ParsedUrlQuery } from 'querystring';
-import { sample } from 'effector';
-import { createGate } from 'effector-react/scope';
+import { createEvent, sample } from 'effector';
 import Router from 'next/router';
 
-import { $todosFilter, filterChanged } from '@/entities/todo/model';
+import { createGate } from 'effector-react/scope';
+import { $todosFilter, filterChanged, todosLoadFx } from '@/entities/todo/model';
 import { TodoFilters } from '@/entities/todo';
 import { isBrowser } from '@/shared/lib/is-browser';
-import { pushFx } from '@/shared/lib/next-effector/router/router';
+import { $routerLocation, pushFx } from '@/shared/lib/next-effector/router/router';
 
-interface RouteProps {
-  query: ParsedUrlQuery;
-}
+export const todoPageOpened = createEvent();
 
-export const TodoPageGate = createGate<RouteProps>({
-  name: 'todo-page',
-  defaultState: {
-    query: {
-      filter: 'all',
-    },
-  },
+export const TodoPageGate = createGate({});
+
+const $queryFilter = $routerLocation.map((state) => (state.query.filter ?? 'all') as TodoFilters);
+
+sample({
+  clock: [todoPageOpened, $queryFilter],
+  target: todosLoadFx,
 });
-
-const $queryFilter = TodoPageGate.state.map((state) => (state.query.filter ?? 'all') as TodoFilters);
 
 sample({
   clock: $todosFilter,

@@ -106,7 +106,7 @@ module.exports = withSentryConfig(
         },
       },
 
-      ...i18nConfig,
+      i18n: i18nConfig.i18n,
 
       images: {
         domains: ['images.unsplash.com'],

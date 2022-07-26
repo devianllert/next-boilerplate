@@ -105,8 +105,6 @@ MultiversalPageEntryPoint.getInitialProps = async (props: AppContext): Promise<a
 
   const scope = fork();
 
-  console.log('APP STARTED');
-
   await allSettled(appStarted, { scope, params: { ...props.ctx, query: location.query } });
   await allSettled(onLocationChange, { scope, params: location });
 
